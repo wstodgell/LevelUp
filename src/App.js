@@ -18,15 +18,23 @@ function BeginingOfDay() {
   const [restedRating, setRestedRating] = useState("");
   const [morningMoodRating, setmorningMoodRating] = useState("");
   const [journalEntry, setJournalEntry] = useState(""); // State for journal entry
+  const [toDo, setToDo] = useState(""); // State for journal entry
 
   // Function to handle button click and submit data
   const handleSubmit = async () => {
+    // Generate the current timestamp
+    const timestamp = new Date().toISOString(); // Current date and time in ISO format
+    const entryType = "beginningOfDay";
+
     const data = {
+      timestamp, // Add the timestamp to the data object
       bedTime,
       upTime,
       restedRating,
       morningMoodRating,
-      journalEntry, // Add journal entry to submitted data
+      journalEntry,
+      toDo,
+      entryType,
     };
 
     // For now, log the data to console (this will be replaced with actual database logic)
@@ -98,6 +106,18 @@ function BeginingOfDay() {
             id="journalEntry"
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
+            rows="10" // Number of visible text lines
+            cols="50" // Number of visible characters per line
+            style={{ resize: "vertical" }} // Allows resizing vertically only
+          />
+        </div>
+        <div className="input-group">
+          <label htmlFor="toDo">ToDo List:</label>
+          <textarea
+            id="toDo"
+            className="todo-list"
+            value={toDo}
+            onChange={(e) => setToDo(e.target.value)}
             rows="10" // Number of visible text lines
             cols="50" // Number of visible characters per line
             style={{ resize: "vertical" }} // Allows resizing vertically only
