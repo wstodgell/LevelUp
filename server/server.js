@@ -19,11 +19,32 @@ const pool = new Pool({
 app.use(cors());
 app.use(bodyParser.json());
 
+// Check database connection
 pool.query("SELECT NOW()", (err, res) => {
   if (err) {
     console.error("Error connecting to the database:", err);
   } else {
     console.log("Database connected, current time:", res.rows[0].now);
+  }
+});
+
+// Endpoint to handle fetching day data based on the selected date
+app.get("/dayData", async (req, res) => {
+  const { date } = req.query;
+
+  try {
+    const queryText =
+      "SELECT * FROM day_entries WHERE CAST(timestamp AS DATE) = $1";
+    const result = await pool.query(queryText, [date]);
+
+    if (result.rows.length > 0) {
+      res.status(200).json(result.rows[0]); // Return the first matching row
+    } else {
+      res.status(200).json(null); // No record found
+    }
+  } catch (error) {
+    console.error("Error fetching day data:", error);
+    res.status(500).json({ error: "Failed to fetch data" });
   }
 });
 

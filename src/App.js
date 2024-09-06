@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import the styles for the editor
@@ -13,12 +13,48 @@ function Home() {
 }
 
 function BeginingOfDay() {
+  const [selectedDate, setSelectedDate] = useState(new Date()); // State for selected date
   const [bedTime, setBedTime] = useState("");
   const [upTime, setUpTime] = useState("");
   const [restedRating, setRestedRating] = useState("");
-  const [morningMoodRating, setmorningMoodRating] = useState("");
-  const [journalEntry, setJournalEntry] = useState(""); // State for journal entry
-  const [toDo, setToDo] = useState(""); // State for journal entry
+  const [morningMoodRating, setMorningMoodRating] = useState("");
+  const [journalEntry, setJournalEntry] = useState("");
+  const [toDo, setToDo] = useState("");
+
+  // Function to handle the API call and fetch data for the selected date
+  const fetchDayData = async (date) => {
+    const formattedDate = date.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/dayData?date=${formattedDate}`
+      );
+      if (response.data) {
+        // If data exists, populate form fields
+        const data = response.data;
+        setBedTime(data.bed_time || "");
+        setUpTime(data.up_time || "");
+        setRestedRating(data.rested_rating || "");
+        setMorningMoodRating(data.morning_mood_rating || "");
+        setJournalEntry(data.journal_entry || "");
+        setToDo(data.to_do_list || "");
+      } else {
+        // If no data exists, clear form fields
+        setBedTime("");
+        setUpTime("");
+        setRestedRating("");
+        setMorningMoodRating("");
+        setJournalEntry("");
+        setToDo("");
+      }
+    } catch (error) {
+      console.error("Error fetching day data:", error);
+    }
+  };
+
+  // UseEffect to fetch data when the component mounts or when the date changes
+  useEffect(() => {
+    fetchDayData(selectedDate);
+  }, [selectedDate]);
 
   // State to track validation errors
   const [errors, setErrors] = useState({
@@ -28,7 +64,8 @@ function BeginingOfDay() {
 
   // Function to handle button click and submit data
   const handleSubmit = async () => {
-    console.log("Submit button clicked"); // Add this to check if the function is triggered
+    console.log("Submit button clicked");
+
     // Reset error messages
     let formErrors = { restedRating: "", morningMoodRating: "" };
 
@@ -45,28 +82,27 @@ function BeginingOfDay() {
     // If there are errors, prevent form submission
     if (formErrors.restedRating || formErrors.morningMoodRating) {
       setErrors(formErrors);
-      console.log("Validation failed"); // Log message for failed validation
+      console.log("Validation failed");
       return;
     }
 
     // Generate the current timestamp
-    const timestamp = new Date().toISOString(); // Current date and time in ISO format
+    const timestamp = new Date().toISOString();
     const entryType = "beginningOfDay";
     const submitted = true;
 
     const data = {
-      timestamp, // Add the timestamp to the data object
+      timestamp,
       bedTime,
       upTime,
-      restedRating: parseInt(restedRating), // Ensure it's sent as an integer
-      morningMoodRating: parseInt(morningMoodRating), // Ensure it's sent as an integer
+      restedRating: parseInt(restedRating),
+      morningMoodRating: parseInt(morningMoodRating),
       journalEntry,
       toDo,
       entryType,
       submitted,
     };
 
-    // For now, log the data to console (this will be replaced with actual database logic)
     console.log("Data to submit:", data);
 
     try {
@@ -75,9 +111,6 @@ function BeginingOfDay() {
     } catch (error) {
       console.error("Error submitting form data:", error);
     }
-
-    // Here, you'd send the data to your backend/database
-    // Example: axios.post('/api/submit', data);
   };
 
   // Helper function to validate the ratings
@@ -90,6 +123,17 @@ function BeginingOfDay() {
     <div className="profile-container">
       <div className="profile-box">
         <h2>Profile Details</h2>
+
+        {/* Calendar Widget */}
+        <div className="input-group">
+          <label>Select Date:</label>
+          <DatePicker
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)} // Update selected date
+            dateFormat="yyyy-MM-dd"
+          />
+        </div>
+
         <div className="input-group">
           <label htmlFor="BedTime">
             Bed time last night? Example: 10:00 PM:
@@ -135,13 +179,14 @@ function BeginingOfDay() {
             type="text"
             id="morningMoodRating"
             value={morningMoodRating}
-            onChange={(e) => setmorningMoodRating(e.target.value)}
-            className={errors.morningMoodRating ? "error" : ""} // Apply error class if there's an error
+            onChange={(e) => setMorningMoodRating(e.target.value)}
+            className={errors.morningMoodRating ? "error" : ""}
           />
           {errors.morningMoodRating && (
             <span className="error-text">{errors.morningMoodRating}</span>
           )}
         </div>
+
         {/* Simple Textarea for Journal Entry */}
         <div className="input-group">
           <label htmlFor="journalEntry">Journal Entry:</label>
@@ -149,9 +194,9 @@ function BeginingOfDay() {
             id="journalEntry"
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
-            rows="10" // Number of visible text lines
-            cols="50" // Number of visible characters per line
-            style={{ resize: "vertical" }} // Allows resizing vertically only
+            rows="10"
+            cols="50"
+            style={{ resize: "vertical" }}
           />
         </div>
         <div className="input-group">
@@ -161,11 +206,12 @@ function BeginingOfDay() {
             className="todo-list"
             value={toDo}
             onChange={(e) => setToDo(e.target.value)}
-            rows="10" // Number of visible text lines
-            cols="50" // Number of visible characters per line
-            style={{ resize: "vertical" }} // Allows resizing vertically only
+            rows="10"
+            cols="50"
+            style={{ resize: "vertical" }}
           />
         </div>
+
         {/* Submit Button */}
         <button className="submit-button" onClick={handleSubmit}>
           Submit
