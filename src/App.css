@@ -222,3 +222,26 @@ textarea {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* Error text styling */
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Textbox error styling */
+input {
+  border: 1px solid #ccc; /* Normal input border */
+  padding: 10px;
+  width: 100%;
+}
+
+input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+input.error {
+  border-color: red; /* Error state */
+}
+

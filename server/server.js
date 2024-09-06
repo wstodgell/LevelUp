@@ -1,37 +1,74 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = 5000;
+
+// PostgreSQL connection pool
+const pool = new Pool({
+  user: "postgres", // Your PostgreSQL username
+  host: "localhost",
+  database: "LeveUp", // The name of your PostgreSQL database
+  password: "1ISOLATEnow!!!", // Your PostgreSQL password
+  port: 5432, // Default PostgreSQL port
+});
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Set the path for the file
-const filePath = path.join(__dirname, "submissions.txt");
-
-// Store submissions in-memory and in file
-let submissions = [];
+pool.query("SELECT NOW()", (err, res) => {
+  if (err) {
+    console.error("Error connecting to the database:", err);
+  } else {
+    console.log("Database connected, current time:", res.rows[0].now);
+  }
+});
 
 // Endpoint to handle form submissions
-app.post("/submit", (req, res) => {
-  const formData = req.body;
-  submissions.push(formData);
+app.post("/submit", async (req, res) => {
+  const {
+    timestamp,
+    bedTime,
+    upTime,
+    restedRating,
+    morningMoodRating,
+    journalEntry,
+    toDo,
+    entryType,
+    submitted,
+  } = req.body;
 
-  // Write to file
-  fs.appendFile(filePath, JSON.stringify(formData) + "\n", (err) => {
-    if (err) {
-      console.error("Failed to save data:", err);
-      return res.status(500).json({ message: "Failed to save data" });
-    }
+  try {
+    // Insert data into PostgreSQL database
+    const queryText = `
+      INSERT INTO day_entries (timestamp, bed_time, up_time, rested_rating, morning_mood_rating, journal_entry, to_do_list, entry_type, submitted) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+    `;
+    const queryValues = [
+      timestamp,
+      bedTime,
+      upTime,
+      restedRating,
+      morningMoodRating,
+      journalEntry,
+      toDo,
+      entryType,
+      submitted,
+    ];
 
-    console.log("Form Data Received and Saved:", formData);
-    res.status(200).json({ message: "Form data received and saved!" });
-  });
+    const result = await pool.query(queryText, queryValues);
+
+    console.log("Form Data Received and Saved:", result.rows[0]);
+    res
+      .status(200)
+      .json({ message: "Form data received and saved!", data: result.rows[0] });
+  } catch (error) {
+    console.error("Failed to save data:", error);
+    res.status(500).json({ message: "Failed to save data" });
+  }
 });
 
 // Start the server

@@ -6,3 +6,5 @@
 {"timestamp":"2024-09-06T19:10:10.824Z","bedTime":"qwd","upTime":"qwd","restedRating":"qwd","morningMoodRating":"qwd","journalEntry":"qwd","toDo":"qwd"}
 {"timestamp":"2024-09-06T19:16:37.404Z","bedTime":"qwer","upTime":"qwer","restedRating":"qwer","morningMoodRating":"qwer","journalEntry":"qwer","toDo":"qwer"}
 {"timestamp":"2024-09-06T19:17:42.924Z","bedTime":"qwer","upTime":"qwer","restedRating":"qwer","morningMoodRating":"qwer","journalEntry":"qwer","toDo":"qwer","entryType":"beginningOfDay"}
+{"timestamp":"2024-09-06T20:18:58.347Z","bedTime":"dasf","upTime":"wqaf","restedRating":"asdf","morningMoodRating":"wef","journalEntry":"sdf","toDo":"awef","entryType":"beginningOfDay"}
+{"timestamp":"2024-09-06T20:21:04.148Z","bedTime":"dasf","upTime":"wqaf","restedRating":"asdf","morningMoodRating":"wef","journalEntry":"sdf","toDo":"awef","entryType":"beginningOfDay"}

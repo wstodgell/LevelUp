@@ -20,21 +20,50 @@ function BeginingOfDay() {
   const [journalEntry, setJournalEntry] = useState(""); // State for journal entry
   const [toDo, setToDo] = useState(""); // State for journal entry
 
+  // State to track validation errors
+  const [errors, setErrors] = useState({
+    restedRating: "",
+    morningMoodRating: "",
+  });
+
   // Function to handle button click and submit data
   const handleSubmit = async () => {
+    console.log("Submit button clicked"); // Add this to check if the function is triggered
+    // Reset error messages
+    let formErrors = { restedRating: "", morningMoodRating: "" };
+
+    // Validate restedRating and morningMoodRating
+    if (!isValidRating(restedRating)) {
+      formErrors.restedRating =
+        "Rested Rating must be an integer between 1 and 5";
+    }
+    if (!isValidRating(morningMoodRating)) {
+      formErrors.morningMoodRating =
+        "Morning Mood Rating must be an integer between 1 and 5";
+    }
+
+    // If there are errors, prevent form submission
+    if (formErrors.restedRating || formErrors.morningMoodRating) {
+      setErrors(formErrors);
+      console.log("Validation failed"); // Log message for failed validation
+      return;
+    }
+
     // Generate the current timestamp
     const timestamp = new Date().toISOString(); // Current date and time in ISO format
     const entryType = "beginningOfDay";
+    const submitted = true;
 
     const data = {
       timestamp, // Add the timestamp to the data object
       bedTime,
       upTime,
-      restedRating,
-      morningMoodRating,
+      restedRating: parseInt(restedRating), // Ensure it's sent as an integer
+      morningMoodRating: parseInt(morningMoodRating), // Ensure it's sent as an integer
       journalEntry,
       toDo,
       entryType,
+      submitted,
     };
 
     // For now, log the data to console (this will be replaced with actual database logic)
@@ -49,6 +78,12 @@ function BeginingOfDay() {
 
     // Here, you'd send the data to your backend/database
     // Example: axios.post('/api/submit', data);
+  };
+
+  // Helper function to validate the ratings
+  const isValidRating = (value) => {
+    const num = parseInt(value);
+    return !isNaN(num) && num >= 1 && num <= 5;
   };
 
   return (
@@ -86,7 +121,11 @@ function BeginingOfDay() {
             id="RestedQuestion"
             value={restedRating}
             onChange={(e) => setRestedRating(e.target.value)}
+            className={errors.restedRating ? "error" : ""} // Apply error class if there's an error
           />
+          {errors.restedRating && (
+            <span className="error-text">{errors.restedRating}</span>
+          )}
         </div>
         <div className="input-group">
           <label htmlFor="morningMoodRating">
@@ -97,7 +136,11 @@ function BeginingOfDay() {
             id="morningMoodRating"
             value={morningMoodRating}
             onChange={(e) => setmorningMoodRating(e.target.value)}
+            className={errors.morningMoodRating ? "error" : ""} // Apply error class if there's an error
           />
+          {errors.morningMoodRating && (
+            <span className="error-text">{errors.morningMoodRating}</span>
+          )}
         </div>
         {/* Simple Textarea for Journal Entry */}
         <div className="input-group">
