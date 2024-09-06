@@ -1,0 +1,4 @@
+{"bedTime":"qwd","upTime":"qwd","restedRating":"qwd","morningMoodRating":"wqd","journalEntry":"qwdqwd"}
+{"bedTime":"qwd","upTime":"qwd","restedRating":"qwd","morningMoodRating":"wqd","journalEntry":"qwdqwd"}
+{"bedTime":"qwd","upTime":"qwd","restedRating":"qwd","morningMoodRating":"wqd","journalEntry":"qwdqwd"}
+{"bedTime":"qwd","upTime":"qwd","restedRating":"qwd","morningMoodRating":"wqd","journalEntry":"qwdqwd"}

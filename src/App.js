@@ -5,6 +5,7 @@ import "react-quill/dist/quill.snow.css"; // Import the styles for the editor
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; // Importing react-datepicker styles
 import levelUpImage from "./assets/images/levelUpImage256.png"; // Import the image
+import axios from "axios";
 
 // Components for different views
 function Home() {
@@ -19,7 +20,7 @@ function BeginingOfDay() {
   const [journalEntry, setJournalEntry] = useState(""); // State for journal entry
 
   // Function to handle button click and submit data
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const data = {
       bedTime,
       upTime,
@@ -30,6 +31,13 @@ function BeginingOfDay() {
 
     // For now, log the data to console (this will be replaced with actual database logic)
     console.log("Data to submit:", data);
+
+    try {
+      const response = await axios.post("http://localhost:5000/submit", data);
+      console.log("Data from server:", response.data.message);
+    } catch (error) {
+      console.error("Error submitting form data:", error);
+    }
 
     // Here, you'd send the data to your backend/database
     // Example: axios.post('/api/submit', data);
