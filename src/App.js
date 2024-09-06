@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css"; // Import the styles for the editor
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; // Importing react-datepicker styles
 import levelUpImage from "./assets/images/levelUpImage256.png"; // Import the image
@@ -10,6 +12,29 @@ function Home() {
 }
 
 function BeginingOfDay() {
+  const [bedTime, setBedTime] = useState("");
+  const [upTime, setUpTime] = useState("");
+  const [restedRating, setRestedRating] = useState("");
+  const [morningMoodRating, setmorningMoodRating] = useState("");
+  const [journalEntry, setJournalEntry] = useState(""); // State for journal entry
+
+  // Function to handle button click and submit data
+  const handleSubmit = () => {
+    const data = {
+      bedTime,
+      upTime,
+      restedRating,
+      morningMoodRating,
+      journalEntry, // Add journal entry to submitted data
+    };
+
+    // For now, log the data to console (this will be replaced with actual database logic)
+    console.log("Data to submit:", data);
+
+    // Here, you'd send the data to your backend/database
+    // Example: axios.post('/api/submit', data);
+  };
+
   return (
     <div className="profile-container">
       <div className="profile-box">
@@ -18,24 +43,62 @@ function BeginingOfDay() {
           <label htmlFor="BedTime">
             Bed time last night? Example: 10:00 PM:
           </label>
-          <input type="text" id="BedTime" />
+          <input
+            type="text"
+            id="BedTime"
+            value={bedTime}
+            onChange={(e) => setBedTime(e.target.value)}
+          />
         </div>
         <div className="input-group">
           <label htmlFor="UpTime">
             Up time this morning? Example: 8:00 AM:
           </label>
-          <input type="text" id="UpTime" />
+          <input
+            type="text"
+            id="UpTime"
+            value={upTime}
+            onChange={(e) => setUpTime(e.target.value)}
+          />
         </div>
         <div className="input-group">
           <label htmlFor="RestedQuestion">
-            How rested do you feel? (1 - 10):
+            How rested do you feel? (1 - 5):
           </label>
-          <input type="text" id="textbox3" />
+          <input
+            type="text"
+            id="RestedQuestion"
+            value={restedRating}
+            onChange={(e) => setRestedRating(e.target.value)}
+          />
         </div>
         <div className="input-group">
-          <label htmlFor="textbox4">Textbox 4:</label>
-          <input type="text" id="textbox4" />
+          <label htmlFor="morningMoodRating">
+            How is your mood today? (1 - 5):
+          </label>
+          <input
+            type="text"
+            id="morningMoodRating"
+            value={morningMoodRating}
+            onChange={(e) => setmorningMoodRating(e.target.value)}
+          />
         </div>
+        {/* Simple Textarea for Journal Entry */}
+        <div className="input-group">
+          <label htmlFor="journalEntry">Journal Entry:</label>
+          <textarea
+            id="journalEntry"
+            value={journalEntry}
+            onChange={(e) => setJournalEntry(e.target.value)}
+            rows="10" // Number of visible text lines
+            cols="50" // Number of visible characters per line
+            style={{ resize: "vertical" }} // Allows resizing vertically only
+          />
+        </div>
+        {/* Submit Button */}
+        <button className="submit-button" onClick={handleSubmit}>
+          Submit
+        </button>
       </div>
     </div>
   );
