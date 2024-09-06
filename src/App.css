@@ -1,84 +1,142 @@
-/* App.css */
-.App {
-  font-family: Arial, sans-serif;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Banner */
-.banner {
-  background-color: #333;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  font-size: 1.5rem;
-  width: 100%;
-  position: relative; /* Removed fixed positioning */
-}
-
-/* Layout */
-.layout {
-  display: flex;
-  flex-grow: 1; /* Allow it to take up all remaining vertical space */
-  height: calc(100vh - 80px); /* Adjust height so it takes the space under the banner */
-}
-
-/* Sidebar */
-.sidebar {
-  background-color: #f4f4f4;
-  padding: 1rem;
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar button {
-  background-color: #007bff;
-  border: none;
-  color: white;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  text-align: left;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.sidebar button:hover {
-  background-color: #0056b3;
-}
-
-/* Content Area */
-.content {
-  flex-grow: 1;
-  padding: 1rem;
-  background-color: #f0f0f0;
-}
-
-/* Profile Container */
-.profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* General styles */
+html, body {
+  margin: 0;
+  padding: 0;
   height: 100%;
 }
 
-/* Profile Box */
-.profile-box {
-  width: 75%; /* 6/8 of the available width */
+.banner {
+  background-color: #333;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px; 
+}
+
+.banner-content {
+  display: flex;
+  align-items: center; /* Align image and text vertically */
+  justify-content: center; /* Center the content horizontally */
+}
+
+.banner-image {
+  width: 100px; /* Adjust size as needed */
+  height: 100px; /* Adjust size as needed */
+  margin-right: 10px; /* Space between image and text */
+}
+
+.banner h1 {
+  margin: 0;
+  font-size: 64px;
+}
+
+
+/* Menu Bar styles */
+.menu-bar {
+  background-color: #444;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Left justify the buttons */
+}
+
+.menu-button {
+  background-color: #666666;
+  color: white;
+  width: 100px; /* Fixed button width */
+  height: 40px; /* Fixed button height */
+  display: flex;
+  justify-content: center; /* Centers text horizontally */
+  align-items: center; /* Centers text vertically */
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 10px; /* Space between buttons */
+  text-align: center;
+}
+
+.menu-button:hover {
+  background-color: #808080;
+}
+
+.layout {
+  display: flex;
+  height: 100vh; /* Ensures the layout covers the full height of the page */
+}
+
+.sidebar {
+  width: 200px;
+  padding: 20px;
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.group {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ccc;
+}
+
+.group h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #007bff; /* Default blue button */
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+}
+
+button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+button.active {
+  background-color: #004080; /* Even darker blue for active button */
+}
+
+/* Content area styles */
+.content {
+  flex-grow: 1;
   padding: 20px;
   background-color: #fff;
-  border-radius: 15px;
-  box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  display: flex; /* Enable flexbox for content */
+  justify-content: center; /* Center horizontally */
+  align-items: flex-start; /* Align near the top */
+  padding-top: 40px; /* Optional: Add some padding at the top if needed */
 }
 
-.profile-box h2 {
-  text-align: center;
-  margin-bottom: 20px;
+
+/* Profile container styles */
+.profile-container {
+  width: 75%; /* Set width to 75% of layout */
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Slight shadow for aesthetic */
 }
 
-/* Input Group Styling */
+.profile-box {
+  display: flex;
+  flex-direction: column;
+}
+
 .input-group {
   margin-bottom: 15px;
 }
@@ -91,7 +149,31 @@
 
 .input-group input {
   width: 100%;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   border: 1px solid #ccc;
 }
+
+/* Calendar Widget */
+.calendar-widget {
+  margin-bottom: 20px;
+}
+
+.calendar-display {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.calendar-display:hover {
+  background-color: #f0f0f0;
+}
+
+/* Adjust DatePicker appearance */
+.react-datepicker {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
