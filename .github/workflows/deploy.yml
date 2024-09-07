@@ -38,5 +38,6 @@ jobs:
       - name: Deploy CDK Stack
         run: |
           npm install -g aws-cdk  # Install CDK globally
+          cd CDK
           cdk bootstrap            # Bootstraps the environment (if not already)
           cdk deploy --require-approval never  # Deploy the CDK stack without approval prompts
