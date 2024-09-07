@@ -3,7 +3,7 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - master # Deploys when changes are pushed to the master branch
+      - master
 
 jobs:
   deploy:
@@ -21,18 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           npm install   # Install dependencies for the app
-          CI=false npm run build # Build the React app
+          npm run build # Build the React app
 
       - name: Build CDK
         run: |
           npm install      # Install dependencies for the CDK
-          CI=false npm run build     # Build the CDK project
-
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
+          npm run build     # Build the CDK project
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
