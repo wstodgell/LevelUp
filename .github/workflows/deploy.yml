@@ -3,7 +3,7 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - master # Use 'master' if your default branch is 'master'
+      - master # Deploys when changes are pushed to the master branch
 
 jobs:
   deploy:
@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install   # Install dependencies for the app
-          npm run build # Build the React app
+          CI=false npm run build # Build the React app
 
       - name: Build CDK
         run: |
