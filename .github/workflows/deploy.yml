@@ -25,7 +25,7 @@ jobs:
 
       - name: Install CDK dependencies (including TypeScript)
         run: |
-          cd cdk  # Navigate to the directory containing your CDK project and cdk.json
+          cd CDK  # Navigate to the directory containing your CDK project and cdk.json
           npm install      # Install CDK dependencies including TypeScript and ts-node
           npm run build     # Build the CDK project
 
@@ -39,6 +39,6 @@ jobs:
       - name: Deploy CDK Stack
         run: |
           npm install -g aws-cdk  # Install CDK globally
-          cd cdk  # Make sure you're in the CDK directory
+          cd CDK  # Make sure you're in the CDK directory
           cdk bootstrap            # Bootstraps the environment (if not already)
           cdk deploy --require-approval never  # Deploy the CDK stack without approval prompts
