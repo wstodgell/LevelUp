@@ -18,6 +18,11 @@ jobs:
         with:
           node-version: "14"
 
+      - name: Log working directory and list contents (for debugging)
+        run: |
+          pwd  # Print the current directory
+          ls -al  # List all files and directories
+
       - name: Install dependencies and build React app
         run: |
           npm install   # Install dependencies for the React app
@@ -25,6 +30,8 @@ jobs:
 
       - name: Install CDK dependencies (including TypeScript)
         run: |
+          pwd  # Print the current directory (again to ensure location)
+          ls -al  # List files in the current directory
           cd CDK  # Navigate to the directory containing your CDK project and cdk.json
           npm install      # Install CDK dependencies including TypeScript and ts-node
           npm run build     # Build the CDK project
