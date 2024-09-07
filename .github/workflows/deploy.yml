@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Print current working directory
+        run: pwd
+
+      - name: List files in current directory
+        run: ls -R
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -24,7 +30,7 @@ jobs:
           npm run build # Build the React app
 
       - name: Install CDK dependencies
-        working-directory: CDK # Set the working directory to your CDK folder
+        working-directory: ./CDK # Set the working directory to your CDK folder
         run: |
           npm install      # Install dependencies for the CDK
           npm run build     # Build the CDK project
@@ -37,7 +43,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy CDK Stack
-        working-directory: CDK # Set the working directory to your CDK folder
+        working-directory: ./CDK # Set the working directory to your CDK folder
         run: |
           npm install -g aws-cdk  # Install CDK globally
           cdk bootstrap            # Bootstraps the environment
