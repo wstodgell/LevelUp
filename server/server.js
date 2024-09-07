@@ -4,15 +4,15 @@ const bodyParser = require("body-parser");
 const { Pool } = require("pg");
 
 const app = express();
-const PORT = 5000;
 
-// PostgreSQL connection pool
+// Use environment variables for configuration
+const PORT = process.env.PORT || 5000;
 const pool = new Pool({
-  user: "postgres", // Your PostgreSQL username
-  host: "localhost",
-  database: "LeveUp", // The name of your PostgreSQL database
-  password: "1ISOLATEnow!!!", // Your PostgreSQL password
-  port: 5432, // Default PostgreSQL port
+  user: process.env.PG_USER || "postgres", // Use environment variables for DB credentials
+  host: process.env.PG_HOST || "localhost",
+  database: process.env.PG_DATABASE || "LevelUp",
+  password: process.env.PG_PASSWORD || "yourPasswordHere",
+  port: process.env.PG_PORT || 5432,
 });
 
 // Middleware
@@ -90,6 +90,15 @@ app.post("/submit", async (req, res) => {
     console.error("Failed to save data:", error);
     res.status(500).json({ message: "Failed to save data" });
   }
+});
+
+// Serve the React build files
+const path = require("path");
+app.use(express.static(path.join(__dirname, "build")));
+
+// Fallback to serving React's index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 // Start the server

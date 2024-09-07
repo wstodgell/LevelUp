@@ -18,9 +18,10 @@ jobs:
         with:
           node-version: "14"
 
-      - name: Install dependencies
+      - name: Install dependencies and build React app
         run: |
-          npm install   # Install dependencies for the app
+          cd react-app  # If your React app is inside a folder called react-app
+          npm install   # Install dependencies for the React app
           npm run build # Build the React app
 
       - name: Build CDK
@@ -33,7 +34,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Replace with your AWS region
+          aws-region: ${{ secrets.AWS_REGION }} # AWS region from GitHub secrets
 
       - name: Deploy CDK Stack
         run: |

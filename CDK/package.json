@@ -5,12 +5,12 @@
     "cdk": "bin/cdk.js"
   },
   "scripts": {
-    "build": "tsc && cd ../react-app && npm run build", // Build both the CDK and the React app
+    "build": "tsc && cd ../react-app && npm run build", 
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "start": "serve -s build", // Serve the React app from the build folder
-    "deploy": "cdk deploy" // Deploy the CDK stack to AWS
+    "start": "serve -s build", 
+    "deploy": "cdk deploy" 
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -25,6 +25,6 @@
     "aws-cdk-lib": "2.155.0",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21",
-    "serve": "^14.0.1" // Add serve to host your React app
+    "serve": "^14.0.1" 
   }
 }
