@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Import the styles for the editor
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; // Importing react-datepicker styles
 import levelUpImage from "./assets/images/levelUpImage256.png"; // Import the image

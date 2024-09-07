@@ -26,7 +26,7 @@ jobs:
       - name: Build CDK
         run: |
           npm install      # Install dependencies for the CDK
-          npm run build     # Build the CDK project
+          CI=false npm run build     # Build the CDK project
 
       - name: Install AWS CLI
         run: |
