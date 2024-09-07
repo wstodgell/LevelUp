@@ -20,7 +20,6 @@ jobs:
 
       - name: Install dependencies and build React app
         run: |
-          cd react-app  # If your React app is inside a folder called react-app
           npm install   # Install dependencies for the React app
           npm run build # Build the React app
 
