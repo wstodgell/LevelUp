@@ -13,11 +13,11 @@ jobs:
       - name: Print current working directory
         run: pwd
 
-      - name: List files in current directory
-        run: ls -R
-
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: List files in current directory
+        run: ls -R
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
