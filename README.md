@@ -43,7 +43,7 @@ This guide will walk you through setting up the full stack project: frontend in 
      submitted BOOLEAN
    );
 
-
+⚠️⚠️⚠️  👀 Look at documentation/git_hub_howto.docx for more information 👀 ⚠️⚠️⚠️
 
 # Getting Started with Create React App
 
