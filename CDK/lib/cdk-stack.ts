@@ -36,7 +36,7 @@ export class CdkStack extends cdk.Stack {
     const env = new elasticbeanstalk.CfnEnvironment(this, 'MyAppEnvironment', {
       environmentName: 'MyAppEnv',
       applicationName: app.applicationName as string, // Link to the application
-      solutionStackName: '64bit Amazon Linux 2 v5.4.4 running Node.js 14',
+      solutionStackName: '64bit Amazon Linux 2 v6.2.0 running Node.js 18', // Use the correct Node.js 14 solution stack
       optionSettings: [
         {
           namespace: 'aws:autoscaling:launchconfiguration',
