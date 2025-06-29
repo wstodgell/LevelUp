@@ -2,6 +2,48 @@
 
 ![App Screenshot](./git_hub_assets/loading_screen.png)
 
+# 🛠️ Project Setup: LevelUp (React + Node + PostgreSQL)
+
+This guide will walk you through setting up the full stack project: frontend in React, backend in Node/Express, and data stored in PostgreSQL.
+
+---
+
+## 📦 Prerequisites
+
+- [Node.js](https://nodejs.org/)
+- [PostgreSQL](https://www.postgresql.org/download/) (version 14+)
+- [pgAdmin](https://www.pgadmin.org/) (GUI tool for PostgreSQL)
+
+---
+
+## 🧱 PostgreSQL Setup
+
+1. **Install PostgreSQL** (if not installed)
+   - During installation, set a password for the default user `postgres`
+
+2. **Open pgAdmin** and:
+   - Connect to the `PostgreSQL` server with user: `postgres`
+   - Create a new database named: `LevelUp`
+   - (Optional: Create a new user/role if needed, else just use `postgres`)
+
+3. **Create required table**  
+   Run this SQL in pgAdmin query tool:
+
+   ```sql
+   CREATE TABLE day_entries (
+     id SERIAL PRIMARY KEY,
+     timestamp TIMESTAMPTZ,
+     bed_time TEXT,
+     up_time TEXT,
+     rested_rating INTEGER,
+     morning_mood_rating INTEGER,
+     journal_entry TEXT,
+     to_do_list TEXT,
+     entry_type TEXT,
+     submitted BOOLEAN
+   );
+
+
 
 # Getting Started with Create React App
 
