@@ -11,7 +11,7 @@ const pool = new Pool({
   user: process.env.PG_USER || "postgres", // Use environment variables for DB credentials
   host: process.env.PG_HOST || "localhost",
   database: process.env.PG_DATABASE || "LevelUp",
-  password: process.env.PG_PASSWORD || "yourPasswordHere",
+  password: process.env.PG_PASSWORD || "LevelUp2025!",
   port: process.env.PG_PORT || 5432,
 });
 
