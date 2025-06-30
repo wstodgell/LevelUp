@@ -5,14 +5,12 @@ import "react-datepicker/dist/react-datepicker.css"; // Importing react-datepick
 import levelUpImage from "./assets/images/levelUpImage256.png"; // Import the image
 import axios from "axios";
 import BeginingOfDay from "./views/BeginingOfDay";
+import EndOfDay from "./views/EndOfDay";
+import Login from "./views/Login";
 
 // Components for different views
 function Home() {
   return <div>This is the Home component</div>;
-}
-
-function EndOfDay() {
-  return <div>This is the End of Day component</div>;
 }
 
 function WeekGoals() {
@@ -95,6 +93,8 @@ function App() {
   // Function to render the selected component
   const renderComponent = () => {
     switch (activeComponent) {
+      case "Login":
+        return <Login />;
       case "Home":
         return <Home />;
       case "BeginingOfDay":
@@ -128,7 +128,12 @@ function App() {
 
       {/* Menu Bar with Log In button */}
       <div className="menu-bar">
-        <button className="menu-button">Log In</button>
+        <button
+          className="menu-button"
+          onClick={() => setActiveComponent("Login")}
+        >
+          Log In / Sign Up
+        </button>
         <button className="menu-button">Analysis</button>
       </div>
 

@@ -20,6 +20,8 @@ html, body {
   display: flex;
   align-items: center; /* Align image and text vertically */
   justify-content: center; /* Center the content horizontally */
+  min-height: 70vh; /* Adjust depending on your layout */
+  padding: 2rem;
 }
 
 .banner-image {
@@ -46,7 +48,7 @@ html, body {
 .menu-button {
   background-color: #666666;
   color: white;
-  width: 100px; /* Fixed button width */
+  width: 120px; /* Fixed button width */
   height: 40px; /* Fixed button height */
   display: flex;
   justify-content: center; /* Centers text horizontally */
@@ -244,4 +246,24 @@ input:focus {
 input.error {
   border-color: red; /* Error state */
 }
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.login-footer a {
+  margin: 0 0.5rem;
+  color: #ccc;
+}
+
 
