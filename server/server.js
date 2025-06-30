@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Pool } = require("pg");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const app = express();
 
@@ -25,6 +27,34 @@ pool.query("SELECT NOW()", (err, res) => {
     console.error("Error connecting to the database:", err);
   } else {
     console.log("Database connected, current time:", res.rows[0].now);
+  }
+});
+
+// Simple login route
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, username, email, password_hash FROM users WHERE email = $1",
+      [email]
+    );
+    if (rows.length === 0) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    res
+      .status(200)
+      .json({ id: user.id, username: user.username, email: user.email });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error during login" });
   }
 });
 
@@ -111,6 +141,37 @@ app.post("/submit", async (req, res) => {
   } catch (error) {
     console.error("Error saving entry:", error);
     res.status(500).json({ message: "Failed to save data" });
+  }
+});
+
+// New: Signup endpoint
+app.post("/signup", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    // 1. Prevent duplicate emails
+    const { rows } = await pool.query("SELECT id FROM users WHERE email = $1", [
+      email,
+    ]);
+    if (rows.length > 0) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+
+    // 2. Hash the password
+    const hash = await bcrypt.hash(password, saltRounds);
+
+    // 3. Insert the new user
+    const result = await pool.query(
+      `INSERT INTO users (username, email, password_hash, created_at)
+        VALUES ($1, $2, $3, NOW())
+        RETURNING id, username, email`,
+      [username, email, hash]
+    );
+
+    res.status(201).json({ user: result.rows[0] });
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ error: "Unexpected server error" });
   }
 });
 

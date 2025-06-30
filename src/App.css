@@ -45,6 +45,13 @@ html, body {
   justify-content: flex-start; /* Left justify the buttons */
 }
 
+.menu-welcome {
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+}
+
+
 .menu-button {
   background-color: #666666;
   color: white;
@@ -267,3 +274,12 @@ input.error {
 }
 
 
+.link-button {
+  background: none;
+  border: none;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1em;
+}

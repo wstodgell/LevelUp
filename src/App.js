@@ -7,6 +7,7 @@ import axios from "axios";
 import BeginingOfDay from "./views/BeginingOfDay";
 import EndOfDay from "./views/EndOfDay";
 import Login from "./views/Login";
+import SignUp from "./views/SignUp";
 
 // Components for different views
 function Home() {
@@ -88,13 +89,33 @@ function CalendarWidget() {
 }
 
 function App() {
-  const [activeComponent, setActiveComponent] = useState("Home");
+  const [activeComponent, setActiveComponent] = useState("Login");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const handleLoginSuccess = (userData) => {
+    console.log("Logged-in user data:", userData); // 🔍 Check this in your browser console
+    setCurrentUser(userData);
+  };
 
   // Function to render the selected component
   const renderComponent = () => {
+    if (!currentUser) {
+      switch (activeComponent) {
+        case "SignUp":
+          return <SignUp setActiveComponent={setActiveComponent} />;
+        case "Login":
+        default:
+          return (
+            <Login
+              setActiveComponent={setActiveComponent}
+              onLoginSuccess={handleLoginSuccess}
+            />
+          );
+      }
+    }
+
+    // Logged-in user views
     switch (activeComponent) {
-      case "Login":
-        return <Login />;
       case "Home":
         return <Home />;
       case "BeginingOfDay":
@@ -128,12 +149,24 @@ function App() {
 
       {/* Menu Bar with Log In button */}
       <div className="menu-bar">
-        <button
-          className="menu-button"
-          onClick={() => setActiveComponent("Login")}
-        >
-          Log In / Sign Up
-        </button>
+        {currentUser ? (
+          <>
+            <div className="menu-welcome">Welcome, {currentUser.username}!</div>
+            <button
+              className="menu-button"
+              onClick={() => setCurrentUser(null)}
+            >
+              Log Out
+            </button>
+          </>
+        ) : (
+          <button
+            className="menu-button"
+            onClick={() => setActiveComponent("Login")}
+          >
+            Log In / Sign Up
+          </button>
+        )}
         <button className="menu-button">Analysis</button>
       </div>
 

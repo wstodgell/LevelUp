@@ -1,18 +1,29 @@
 import React, { useState } from "react";
+import axios from "axios"; // Make sure axios is imported
+import FormCard from "../components/FormCard";
 
-function Login() {
+function Login({ setActiveComponent, onLoginSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Logging in with:", email, password);
-    // You’ll add real auth later here
+    try {
+      const res = await axios.post("http://localhost:5000/login", {
+        email,
+        password,
+      });
+      console.log("Login ok:", res.data);
+      onLoginSuccess(res.data); // <— send user data up to App
+      setActiveComponent("Home");
+    } catch (err) {
+      console.error(err);
+      alert("Login failed: " + (err.response?.data?.error || err.message));
+    }
   };
 
   return (
-    <div className="login-container">
-      <h2>Sign in with email</h2>
+    <FormCard title="Sign in with email">
       <form onSubmit={handleSubmit}>
         <div className="input-group">
           <label>Email Address *</label>
@@ -42,9 +53,17 @@ function Login() {
       <div className="login-footer">
         <a href="#">Forgot password?</a>
         <span> | </span>
-        <a href="#">Sign Up</a>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setActiveComponent("SignUp");
+          }}
+        >
+          Sign Up
+        </a>
       </div>
-    </div>
+    </FormCard>
   );
 }
 

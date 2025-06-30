@@ -4,7 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 
 function EndOfDay() {
-  return <div>This is the WeekGoals component</div>;
+  return <div>This is the End of Day component</div>;
 }
 
 export default EndOfDay;
