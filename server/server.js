@@ -60,27 +60,32 @@ app.post("/login", async (req, res) => {
 
 // Endpoint to handle fetching day data based on the selected date
 app.get("/dayData", async (req, res) => {
-  const { date } = req.query;
+  const { userId, date } = req.query;
 
   try {
-    const queryText =
-      "SELECT * FROM day_entries WHERE CAST(timestamp AS DATE) = $1";
-    const result = await pool.query(queryText, [date]);
+    const dayRes = await pool.query(
+      `SELECT * FROM day_entries WHERE user_id = $1 AND entry_date = $2`,
+      [userId, date]
+    );
 
-    if (result.rows.length > 0) {
-      res.status(200).json(result.rows[0]); // Return the first matching row
-    } else {
-      res.status(200).json(null); // No record found
-    }
+    if (!dayRes.rows.length) return res.json({ entry: null, todos: [] });
+
+    const entry = dayRes.rows[0];
+    const todoRes = await pool.query(
+      `SELECT content, completed FROM todo_items
+       WHERE user_id = $1 AND entry_date = $2`,
+      [userId, date]
+    );
+
+    res.json({ entry, todos: todoRes.rows });
   } catch (error) {
     console.error("Error fetching day data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
+    res.status(500).json({ error: "Failed to fetch day data" });
   }
 });
 
 // Endpoint to handle form submissions
 app.post("/submit", async (req, res) => {
-  console.log("POST /submit route hit");
   const {
     userId,
     timestamp,
@@ -89,60 +94,78 @@ app.post("/submit", async (req, res) => {
     restedRating,
     morningMoodRating,
     journalEntry,
-    toDo,
     entryType,
     submitted,
+    todos = [],
   } = req.body;
 
-  console.log("entryDate being submitted:", timestamp);
-  const entryDate = new Date(timestamp).toISOString().split("T")[0]; // Extract YYYY-MM-DD
-  console.log("entryDate after conversion:", entryDate);
+  const entryDate = new Date(timestamp).toISOString().split("T")[0];
 
   try {
-    const insertQuery = `
+    const dayResult = await pool.query(
+      `
       INSERT INTO day_entries (
-        user_id, timestamp, bed_time, up_time, rested_rating, morning_mood_rating, 
-        journal_entry, to_do_list, entry_type, submitted, entry_date
-      )
-      VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-      )
+        user_id, timestamp, bed_time, up_time, rested_rating,
+        morning_mood_rating, journal_entry, entry_type, submitted, entry_date
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       ON CONFLICT (user_id, entry_date)
       DO UPDATE SET
-        timestamp = EXCLUDED.timestamp,
-        bed_time = EXCLUDED.bed_time,
-        up_time = EXCLUDED.up_time,
-        rested_rating = EXCLUDED.rested_rating,
+        timestamp           = EXCLUDED.timestamp,
+        bed_time            = EXCLUDED.bed_time,
+        up_time             = EXCLUDED.up_time,
+        rested_rating       = EXCLUDED.rested_rating,
         morning_mood_rating = EXCLUDED.morning_mood_rating,
-        journal_entry = EXCLUDED.journal_entry,
-        to_do_list = EXCLUDED.to_do_list,
-        entry_type = EXCLUDED.entry_type,
-        submitted = EXCLUDED.submitted
+        journal_entry       = EXCLUDED.journal_entry,
+        entry_type          = EXCLUDED.entry_type,
+        submitted           = EXCLUDED.submitted
+      RETURNING id, user_id, entry_date;
+    `,
+      [
+        userId,
+        timestamp,
+        bedTime,
+        upTime,
+        restedRating,
+        morningMoodRating,
+        journalEntry,
+        entryType,
+        submitted,
+        entryDate,
+      ]
+    );
+
+    const entry = dayResult.rows[0];
+
+    await pool.query(
+      `DELETE FROM todo_items WHERE user_id = $1 AND entry_date = $2`,
+      [userId, entry.entry_date]
+    );
+
+    const insertedTodos = [];
+    const todoText = `
+      INSERT INTO todo_items 
+        (user_id, entry_date, content, completed, created_at, updated_at) 
+      VALUES ($1, $2, $3, $4, NOW(), NOW())
       RETURNING *;
     `;
+    for (const item of todos) {
+      const todoRes = await pool.query(todoText, [
+        userId,
+        entry.entry_date,
+        item.content,
+        item.completed ?? false,
+      ]);
+      insertedTodos.push(todoRes.rows[0]);
+    }
 
-    const insertValues = [
-      userId,
-      timestamp,
-      bedTime,
-      upTime,
-      restedRating,
-      morningMoodRating,
-      journalEntry,
-      toDo,
-      entryType,
-      submitted,
-      entryDate,
-    ];
-
-    const result = await pool.query(insertQuery, insertValues);
     res.status(200).json({
-      message: "Entry inserted or updated!",
-      data: result.rows[0],
+      message: "Entry + todos saved",
+      entry,
+      todos: insertedTodos,
     });
-  } catch (error) {
-    console.error("Error saving entry:", error);
-    res.status(500).json({ message: "Failed to save data" });
+  } catch (err) {
+    console.error("Error saving entry/todos:", err);
+    res.status(500).json({ error: "Failed to save entry & todos" });
   }
 });
 

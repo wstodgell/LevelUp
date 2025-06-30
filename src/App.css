@@ -283,3 +283,41 @@ input.error {
   padding: 0;
   font-size: 1em;
 }
+
+.form-button-group button {
+  display: inline-block;
+  width: auto;
+  min-width: 100px;
+  max-width: 140px;
+  padding: 10px 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-right: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Button Colors */
+.form-button-group .submit-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.form-button-group .edit-button {
+  background-color: orange;
+  color: white;
+}
+
+.form-button-group .cancel-button {
+  background-color: gray;
+  color: white;
+}
+
+.form-button-group button:disabled {
+  background-color: #e0e0e0 !important; /* 👈 light grey background */
+  color: #999 !important;              /* 👈 muted text color */
+  cursor: not-allowed;
+  opacity: 1 !important;               /* remove faded opacity */
+  border: 1px solid #ccc;
+}

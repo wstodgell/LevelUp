@@ -11,34 +11,42 @@ function BeginingOfDay({ currentUser }) {
   const [morningMoodRating, setMorningMoodRating] = useState("");
   const [journalEntry, setJournalEntry] = useState("");
   const [toDo, setToDo] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState({
     restedRating: "",
     morningMoodRating: "",
   });
 
-  console.log("BeginingOfDay component loaded!");
+  const isDisabled = submitted && !editMode;
 
   const fetchDayData = async (date) => {
     const formattedDate = date.toISOString().split("T")[0];
     try {
       const response = await axios.get(
-        `http://localhost:5000/dayData?date=${formattedDate}`
+        `http://localhost:5000/dayData?userId=${currentUser.id}&date=${formattedDate}`
       );
-      if (response.data) {
-        const data = response.data;
+
+      if (response.data && response.data.entry) {
+        const data = response.data.entry;
         setBedTime(data.bed_time || "");
         setUpTime(data.up_time || "");
         setRestedRating(data.rested_rating || "");
         setMorningMoodRating(data.morning_mood_rating || "");
         setJournalEntry(data.journal_entry || "");
-        setToDo(data.to_do_list || "");
+        setToDo(response.data.todos.map((t) => t.content).join("\n"));
+        setSubmitted(data.submitted); // 💡 get `submitted` from backend
+        setEditMode(false); // reset edit mode on new load
       } else {
+        // Clear fields if no entry
         setBedTime("");
         setUpTime("");
         setRestedRating("");
         setMorningMoodRating("");
         setJournalEntry("");
         setToDo("");
+        setSubmitted(false);
+        setEditMode(false);
       }
     } catch (error) {
       console.error("Error fetching day data:", error);
@@ -48,6 +56,11 @@ function BeginingOfDay({ currentUser }) {
   useEffect(() => {
     fetchDayData(selectedDate);
   }, [selectedDate]);
+
+  const isValidRating = (value) => {
+    const num = parseInt(value);
+    return !isNaN(num) && num >= 1 && num <= 5;
+  };
 
   const handleSubmit = async () => {
     let formErrors = { restedRating: "", morningMoodRating: "" };
@@ -77,19 +90,20 @@ function BeginingOfDay({ currentUser }) {
       toDo,
       entryType: "beginningOfDay",
       submitted: true,
+      todos: toDo
+        .split("\n")
+        .filter((item) => item.trim() !== "")
+        .map((content) => ({ content, completed: false })),
     };
 
     try {
       const response = await axios.post("http://localhost:5000/submit", data);
       console.log("Data from server:", response.data.message);
+      setSubmitted(true); // ✅ now we consider this locked
+      setEditMode(false); // ✅ end edit mode
     } catch (error) {
       console.error("Error submitting form data:", error);
     }
-  };
-
-  const isValidRating = (value) => {
-    const num = parseInt(value);
-    return !isNaN(num) && num >= 1 && num <= 5;
   };
 
   return (
@@ -107,38 +121,34 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="BedTime">
-            Bed time last night? Example: 10:00 PM:
-          </label>
+          <label htmlFor="BedTime">Bed time last night?</label>
           <input
             type="text"
             id="BedTime"
             value={bedTime}
             onChange={(e) => setBedTime(e.target.value)}
+            disabled={isDisabled}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="UpTime">
-            Up time this morning? Example: 8:00 AM:
-          </label>
+          <label htmlFor="UpTime">Up time this morning?</label>
           <input
             type="text"
             id="UpTime"
             value={upTime}
             onChange={(e) => setUpTime(e.target.value)}
+            disabled={isDisabled}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="RestedQuestion">
-            How rested do you feel? (1 - 5):
-          </label>
+          <label>How rested do you feel? (1 - 5):</label>
           <input
             type="text"
-            id="RestedQuestion"
             value={restedRating}
             onChange={(e) => setRestedRating(e.target.value)}
+            disabled={isDisabled}
             className={errors.restedRating ? "error" : ""}
           />
           {errors.restedRating && (
@@ -147,14 +157,12 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="morningMoodRating">
-            How is your mood today? (1 - 5):
-          </label>
+          <label>How is your mood today? (1 - 5):</label>
           <input
             type="text"
-            id="morningMoodRating"
             value={morningMoodRating}
             onChange={(e) => setMorningMoodRating(e.target.value)}
+            disabled={isDisabled}
             className={errors.morningMoodRating ? "error" : ""}
           />
           {errors.morningMoodRating && (
@@ -163,32 +171,53 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="journalEntry">Journal Entry:</label>
+          <label>Journal Entry:</label>
           <textarea
-            id="journalEntry"
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
-            rows="10"
-            cols="50"
-            style={{ resize: "vertical" }}
+            disabled={isDisabled}
+            rows="5"
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="toDo">ToDo List:</label>
+          <label>ToDo List:</label>
           <textarea
-            id="toDo"
             value={toDo}
             onChange={(e) => setToDo(e.target.value)}
-            rows="10"
-            cols="50"
-            style={{ resize: "vertical" }}
+            disabled={isDisabled}
+            rows="5"
           />
         </div>
 
-        <button className="submit-button" onClick={handleSubmit}>
-          Submit
-        </button>
+        <div className="form-button-group">
+          <button
+            className="submit-button"
+            onClick={handleSubmit}
+            disabled={submitted && !editMode} // greyed out when submitted but not editing
+          >
+            Submit
+          </button>
+
+          <button
+            className="edit-button"
+            onClick={() => setEditMode(true)}
+            disabled={editMode} // greyed out while in edit mode
+          >
+            Edit
+          </button>
+
+          <button
+            className="cancel-button"
+            onClick={() => {
+              setEditMode(false);
+              fetchDayData(selectedDate);
+            }}
+            disabled={!editMode} // greyed out unless in edit mode
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
