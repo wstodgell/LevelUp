@@ -50,6 +50,7 @@ app.get("/dayData", async (req, res) => {
 
 // Endpoint to handle form submissions
 app.post("/submit", async (req, res) => {
+  console.log("POST /submit route hit");
   const {
     timestamp,
     bedTime,
@@ -62,13 +63,34 @@ app.post("/submit", async (req, res) => {
     submitted,
   } = req.body;
 
+  console.log("entryDate being submitted:", timestamp);
+  const entryDate = new Date(timestamp).toISOString().split("T")[0]; // Extract YYYY-MM-DD
+  console.log("entryDate after conversion:", entryDate);
+
   try {
-    // Insert data into PostgreSQL database
-    const queryText = `
-      INSERT INTO day_entries (timestamp, bed_time, up_time, rested_rating, morning_mood_rating, journal_entry, to_do_list, entry_type, submitted) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+    const insertQuery = `
+      INSERT INTO day_entries (
+        timestamp, bed_time, up_time, rested_rating, morning_mood_rating, 
+        journal_entry, to_do_list, entry_type, submitted, entry_date
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+      )
+      ON CONFLICT (entry_date)
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        bed_time = EXCLUDED.bed_time,
+        up_time = EXCLUDED.up_time,
+        rested_rating = EXCLUDED.rested_rating,
+        morning_mood_rating = EXCLUDED.morning_mood_rating,
+        journal_entry = EXCLUDED.journal_entry,
+        to_do_list = EXCLUDED.to_do_list,
+        entry_type = EXCLUDED.entry_type,
+        submitted = EXCLUDED.submitted
+      RETURNING *;
     `;
-    const queryValues = [
+
+    const insertValues = [
       timestamp,
       bedTime,
       upTime,
@@ -78,16 +100,16 @@ app.post("/submit", async (req, res) => {
       toDo,
       entryType,
       submitted,
+      entryDate,
     ];
 
-    const result = await pool.query(queryText, queryValues);
-
-    console.log("Form Data Received and Saved:", result.rows[0]);
-    res
-      .status(200)
-      .json({ message: "Form data received and saved!", data: result.rows[0] });
+    const result = await pool.query(insertQuery, insertValues);
+    res.status(200).json({
+      message: "Entry inserted or updated!",
+      data: result.rows[0],
+    });
   } catch (error) {
-    console.error("Failed to save data:", error);
+    console.error("Error saving entry:", error);
     res.status(500).json({ message: "Failed to save data" });
   }
 });
