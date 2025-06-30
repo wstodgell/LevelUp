@@ -82,6 +82,7 @@ app.get("/dayData", async (req, res) => {
 app.post("/submit", async (req, res) => {
   console.log("POST /submit route hit");
   const {
+    userId,
     timestamp,
     bedTime,
     upTime,
@@ -100,13 +101,13 @@ app.post("/submit", async (req, res) => {
   try {
     const insertQuery = `
       INSERT INTO day_entries (
-        timestamp, bed_time, up_time, rested_rating, morning_mood_rating, 
+        user_id, timestamp, bed_time, up_time, rested_rating, morning_mood_rating, 
         journal_entry, to_do_list, entry_type, submitted, entry_date
       )
       VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
       )
-      ON CONFLICT (entry_date)
+      ON CONFLICT (user_id, entry_date)
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         bed_time = EXCLUDED.bed_time,
@@ -121,6 +122,7 @@ app.post("/submit", async (req, res) => {
     `;
 
     const insertValues = [
+      userId,
       timestamp,
       bedTime,
       upTime,

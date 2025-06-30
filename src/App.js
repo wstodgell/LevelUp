@@ -119,7 +119,7 @@ function App() {
       case "Home":
         return <Home />;
       case "BeginingOfDay":
-        return <BeginingOfDay />;
+        return <BeginingOfDay currentUser={currentUser} />;
       case "EndOfDay":
         return <EndOfDay />;
       case "WeekGoals":

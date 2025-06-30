@@ -3,7 +3,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 
-function BeginingOfDay() {
+function BeginingOfDay({ currentUser }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bedTime, setBedTime] = useState("");
   const [upTime, setUpTime] = useState("");
@@ -67,6 +67,7 @@ function BeginingOfDay() {
     }
 
     const data = {
+      userId: currentUser.id,
       timestamp: selectedDate.toISOString(),
       bedTime,
       upTime,
