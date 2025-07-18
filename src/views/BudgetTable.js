@@ -21,10 +21,20 @@ export default function BudgetTable({ currentUser }) {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log("🚫 No current user!");
+      return;
+    }
+    console.log("✅ Sending request with userId:", currentUser.id);
+
     axios
-      .get(`/budget`, { params: { userId: currentUser.id } })
-      .then((res) => setRows(res.data))
+      .get(`http://localhost:5000/budget`, {
+        params: { userId: currentUser.id },
+      })
+      .then((res) => {
+        console.log("✅ Budget data:", res.data);
+        setRows(res.data);
+      })
       .catch(console.error);
   }, [currentUser]);
 
