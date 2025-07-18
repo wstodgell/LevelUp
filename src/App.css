@@ -321,3 +321,37 @@ input.error {
   opacity: 1 !important;               /* remove faded opacity */
   border: 1px solid #ccc;
 }
+
+.always-editable {
+  border-bottom: 2px dashed #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.radix-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.radix-checkbox-box {
+  all: unset;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid #666;
+  border-radius: 4px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radix-checkbox-box[data-state="checked"] {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.radix-checkbox-label {
+  font-size: 16px;
+}

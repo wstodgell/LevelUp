@@ -111,8 +111,8 @@ function BeginingOfDay({ currentUser }) {
       <div className="profile-box">
         <h2>Profile Details</h2>
 
-        <div className="input-group">
-          <label>Select Date:</label>
+        <div className="input-group always-editable">
+          <label>📅 Select Date:</label>
           <DatePicker
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
@@ -121,7 +121,7 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="BedTime">Bed time last night?</label>
+          <label htmlFor="BedTime">🛏️ Bed time last night?</label>
           <input
             type="text"
             id="BedTime"
@@ -132,7 +132,7 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="UpTime">Up time this morning?</label>
+          <label htmlFor="UpTime">☀️ Up time this morning?</label>
           <input
             type="text"
             id="UpTime"
@@ -143,7 +143,7 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label>How rested do you feel? (1 - 5):</label>
+          <label>🔋 How rested do you feel? (1 - 5):</label>
           <input
             type="text"
             value={restedRating}
@@ -157,7 +157,7 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label>How is your mood today? (1 - 5):</label>
+          <label>😊 How is your mood today? (1 - 5):</label>
           <input
             type="text"
             value={morningMoodRating}
@@ -171,7 +171,7 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label>Journal Entry:</label>
+          <label>📓 Journal Entry:</label>
           <textarea
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
@@ -181,7 +181,7 @@ function BeginingOfDay({ currentUser }) {
         </div>
 
         <div className="input-group">
-          <label>ToDo List:</label>
+          <label>✍️ ToDo List:</label>
           <textarea
             value={toDo}
             onChange={(e) => setToDo(e.target.value)}

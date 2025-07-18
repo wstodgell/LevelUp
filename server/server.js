@@ -68,14 +68,13 @@ app.get("/dayData", async (req, res) => {
       [userId, date]
     );
 
-    if (!dayRes.rows.length) return res.json({ entry: null, todos: [] });
-
-    const entry = dayRes.rows[0];
     const todoRes = await pool.query(
       `SELECT content, completed FROM todo_items
        WHERE user_id = $1 AND entry_date = $2`,
       [userId, date]
     );
+
+    const entry = dayRes.rows.length ? dayRes.rows[0] : null;
 
     res.json({ entry, todos: todoRes.rows });
   } catch (error) {
@@ -197,6 +196,96 @@ app.post("/signup", async (req, res) => {
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ error: "Unexpected server error" });
+  }
+});
+
+app.post("/endOfDay", async (req, res) => {
+  const { userId, timestamp, journalEntry, submitted, todos = [] } = req.body;
+
+  const entryDate = new Date(timestamp).toISOString().split("T")[0];
+
+  try {
+    // Save or update endOfDay entry
+    const dayResult = await pool.query(
+      `
+      INSERT INTO day_entries (
+        user_id, timestamp, journal_entry, entry_type, submitted, entry_date
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (user_id, entry_date)
+      DO UPDATE SET
+        timestamp     = EXCLUDED.timestamp,
+        journal_entry = EXCLUDED.journal_entry,
+        entry_type    = EXCLUDED.entry_type,
+        submitted     = EXCLUDED.submitted
+      RETURNING id, user_id, entry_date;
+      `,
+      [userId, timestamp, journalEntry, "endOfDay", submitted, entryDate]
+    );
+
+    const entry = dayResult.rows[0];
+
+    // Replace todo items
+    await pool.query(
+      `DELETE FROM todo_items WHERE user_id = $1 AND entry_date = $2`,
+      [userId, entry.entry_date]
+    );
+
+    const insertedTodos = [];
+    const todoInsert = `
+      INSERT INTO todo_items
+        (user_id, entry_date, content, completed, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, NOW(), NOW())
+      RETURNING *;
+    `;
+
+    for (const todo of todos) {
+      const result = await pool.query(todoInsert, [
+        userId,
+        entry.entry_date,
+        todo.content,
+        todo.completed ?? false,
+      ]);
+      insertedTodos.push(result.rows[0]);
+    }
+
+    res.status(200).json({
+      message: "End-of-day entry and todos saved",
+      entry,
+      todos: insertedTodos,
+    });
+  } catch (err) {
+    console.error("Error saving end-of-day data:", err);
+    res.status(500).json({ error: "Failed to save end-of-day data" });
+  }
+});
+
+app.get("/budget", async (req, res) => {
+  const userId = req.query.userId;
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        b.id,
+        b.user_id,
+        c.name AS category,
+        b.month,
+        b.year,
+        b.amount,
+        b.budgeted,
+        b.type
+      FROM budget_entries b
+      JOIN budget_categories c ON b.category_id = c.id
+      WHERE b.user_id = $1
+      ORDER BY b.year, b.month
+    `,
+      [userId]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("Error fetching budget:", err);
+    res.status(500).json({ error: "Failed to fetch budget data" });
   }
 });
 

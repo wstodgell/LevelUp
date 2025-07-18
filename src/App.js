@@ -8,6 +8,7 @@ import BeginingOfDay from "./views/BeginingOfDay";
 import EndOfDay from "./views/EndOfDay";
 import Login from "./views/Login";
 import SignUp from "./views/SignUp";
+import BudgetTable from "./views/BudgetTable";
 
 // Components for different views
 function Home() {
@@ -22,8 +23,20 @@ function MonthGoals() {
   return <div>This is the Month Goals component</div>;
 }
 
-function Finance() {
-  return <div>This is the Finance component</div>;
+function Summary() {
+  return <div>This is the Summary component</div>;
+}
+
+function Budget() {
+  return (
+    <div style={{ padding: "2rem" }}>
+      <BudgetTable />
+    </div>
+  );
+}
+
+function Transactions() {
+  return <div>This is the Transactions component</div>;
 }
 
 function Profile() {
@@ -121,13 +134,17 @@ function App() {
       case "BeginingOfDay":
         return <BeginingOfDay currentUser={currentUser} />;
       case "EndOfDay":
-        return <EndOfDay />;
+        return <EndOfDay currentUser={currentUser} />;
       case "WeekGoals":
         return <WeekGoals />;
       case "MonthGoals":
         return <MonthGoals />;
-      case "Finance":
-        return <Finance />;
+      case "Summary":
+        return <Summary />;
+      case "Budget":
+        return <Budget />;
+      case "Transactions":
+        return <Transactions />;
       case "Profile":
         return <Profile />;
       case "Settings":
@@ -201,9 +218,9 @@ function App() {
             </button>
           </div>
 
-          {/* Second group */}
+          {/* Goals */}
           <div className="group">
-            <h3>Goals & Finance</h3>
+            <h3>Goals</h3>
             <button
               className={activeComponent === "WeekGoals" ? "active" : ""}
               onClick={() => setActiveComponent("WeekGoals")}
@@ -221,6 +238,29 @@ function App() {
               onClick={() => setActiveComponent("Finance")}
             >
               Finance
+            </button>
+          </div>
+
+          {/* Finance */}
+          <div className="group">
+            <h3>Finance</h3>
+            <button
+              className={activeComponent === "Summary" ? "active" : ""}
+              onClick={() => setActiveComponent("Summary")}
+            >
+              Summary
+            </button>
+            <button
+              className={activeComponent === "Budget" ? "active" : ""}
+              onClick={() => setActiveComponent("Budget")}
+            >
+              Budget
+            </button>
+            <button
+              className={activeComponent === "Transactions" ? "active" : ""}
+              onClick={() => setActiveComponent("Transactions")}
+            >
+              Transactions
             </button>
           </div>
 
