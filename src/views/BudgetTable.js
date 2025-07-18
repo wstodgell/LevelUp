@@ -1,82 +1,71 @@
-import * as React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Typography } from "@mui/material";
-
-const initialRows = [
-  { id: 1, category: "Phone", May: 73.7, June: 73.7 },
-  { id: 2, category: "Internet", May: 66.96, June: 66.96 },
-];
+import { Box, Typography, Button } from "@mui/material";
+import axios from "axios";
 
 const columns = [
   { field: "category", headerName: "Category", minWidth: 150, editable: true },
+  { field: "month", headerName: "Month", width: 100 },
   {
-    field: "May",
-    headerName: "May",
+    field: "amount",
+    headerName: "Amount",
     width: 100,
     editable: true,
     type: "number",
   },
-  {
-    field: "June",
-    headerName: "June",
-    width: 100,
-    editable: true,
-    type: "number",
-  },
+  // add more fields if needed
 ];
 
-export default function BudgetTable() {
-  const [rows, setRows] = React.useState(initialRows);
+export default function BudgetTable({ currentUser }) {
+  console.log("💡 BudgetTable currentUser prop is:", currentUser);
+  const [rows, setRows] = useState([]);
 
-  const handleEditCellChangeCommitted = React.useCallback(
-    ({ id, field, value }) => {
-      setRows((prev) =>
-        prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
-      );
-    },
-    []
-  );
+  useEffect(() => {
+    if (!currentUser) return;
+    axios
+      .get(`/budget`, { params: { userId: currentUser.id } })
+      .then((res) => setRows(res.data))
+      .catch(console.error);
+  }, [currentUser]);
+
+  const handleEdit = useCallback(({ id, field, value }) => {
+    setRows((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r))
+    );
+    axios.put(`/budget/${id}`, { [field]: value }).catch(console.error);
+  }, []);
+
+  const handleAddRow = () => {
+    axios
+      .post("/budget", {
+        userId: currentUser.id,
+        category: "",
+        month: "July",
+        amount: 0,
+        type: "fixed",
+      })
+      .then((res) => {
+        setRows((prev) => [...prev, res.data]);
+      })
+      .catch(console.error);
+  };
 
   return (
-    <Box sx={{ height: 400, maxWidth: 600, overflowX: "auto", padding: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Budget Grid (Editable)
-      </Typography>
-
-      <Box sx={{ marginBottom: 2 }}>
-        <button
-          onClick={() => {
-            const newId = rows.length ? rows[rows.length - 1].id + 1 : 1;
-            setRows((prev) => [
-              ...prev,
-              { id: newId, category: "", May: 0, June: 0 },
-            ]);
-          }}
-        >
-          ➕ Add Row
-        </button>
-      </Box>
-
+    <Box
+      sx={
+        {
+          /* same styling as before */
+        }
+      }
+    >
+      <Typography variant="h6">Budget</Typography>
+      <Button onClick={handleAddRow}>➕ Add Row</Button>
       <DataGrid
-        autoHeight
         rows={rows}
         columns={columns}
-        onCellEditCommit={handleEditCellChangeCommitted}
-        disableSelectionOnClick
-        experimentalFeatures={{ newEditingApi: true }}
-        columnBuffer={2}
+        onCellEditCommit={handleEdit}
         rowHeight={28}
-        sx={{
-          "& .MuiDataGrid-row": {
-            borderBottom: "1px solid #ddd",
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            borderBottom: "2px solid #bbb",
-          },
-          "& .MuiDataGrid-cell": {
-            borderRight: "1px solid #eee",
-          },
-        }}
+        // your sx styling
       />
     </Box>
   );

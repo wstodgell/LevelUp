@@ -27,10 +27,10 @@ function Summary() {
   return <div>This is the Summary component</div>;
 }
 
-function Budget() {
+function Budget({ currentUser }) {
   return (
     <div style={{ padding: "2rem" }}>
-      <BudgetTable />
+      <BudgetTable currentUser={currentUser} />
     </div>
   );
 }
@@ -142,7 +142,8 @@ function App() {
       case "Summary":
         return <Summary />;
       case "Budget":
-        return <Budget />;
+        console.log("Logged-in user data:", currentUser);
+        return <Budget currentUser={currentUser} />;
       case "Transactions":
         return <Transactions />;
       case "Profile":

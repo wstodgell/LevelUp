@@ -261,13 +261,14 @@ app.post("/endOfDay", async (req, res) => {
 
 app.get("/budget", async (req, res) => {
   const userId = req.query.userId;
+  if (!userId) return res.status(400).json({ error: "Missing userId" });
 
   try {
     const result = await pool.query(
       `
       SELECT 
         b.id,
-        b.user_id,
+        b.category_id,
         c.name AS category,
         b.month,
         b.year,
@@ -277,15 +278,15 @@ app.get("/budget", async (req, res) => {
       FROM budget_entries b
       JOIN budget_categories c ON b.category_id = c.id
       WHERE b.user_id = $1
-      ORDER BY b.year, b.month
+      ORDER BY b.year, b.month, c.name
     `,
       [userId]
     );
 
-    res.status(200).json(result.rows);
+    res.json(result.rows);
   } catch (err) {
     console.error("Error fetching budget:", err);
-    res.status(500).json({ error: "Failed to fetch budget data" });
+    res.status(500).json({ error: "Failed to fetch budget" });
   }
 });
 
