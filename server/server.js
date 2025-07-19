@@ -311,6 +311,22 @@ app.get("/budget", async (req, res) => {
   }
 });
 
+app.get("/transactions/hashes", async (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) return res.status(400).json({ error: "Missing userId" });
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT unique_hash FROM transactions WHERE user_id = $1",
+      [userId]
+    );
+    res.json(rows.map((r) => r.unique_hash));
+  } catch (err) {
+    console.error("Error fetching hashes:", err);
+    res.status(500).json({ error: "Failed to get hashes" });
+  }
+});
+
 app.post("/transactions", async (req, res) => {
   const transactions = req.body;
 
@@ -324,35 +340,50 @@ app.post("/transactions", async (req, res) => {
   const placeholders = [];
 
   transactions.forEach((tx, i) => {
-    const baseIndex = i * 6; // 6 fields per row
+    const baseIndex = i * 7; // 7 fields per row
 
     placeholders.push(
       `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${
         baseIndex + 4
-      }, $${baseIndex + 5}, $${baseIndex + 6})`
+      }, $${baseIndex + 5}, $${baseIndex + 6}, $${baseIndex + 7})`
     );
 
     values.push(
       tx.user_id,
       tx.date,
-      tx.description,
+      tx.description || "",
       tx.category || null,
       tx.amount,
-      tx.card || null
+      tx.card || null,
+      tx.unique_hash || null
     );
   });
 
   const query = `
-    INSERT INTO transactions (user_id, date, description, category, amount, card)
-    VALUES ${placeholders.join(", ")}
-    RETURNING *;
-  `;
+  INSERT INTO transactions (user_id, date, description, category, amount, card, unique_hash)
+  VALUES ${placeholders.join(", ")}
+  ON CONFLICT (unique_hash) DO NOTHING
+  RETURNING *;
+`;
+
+  // ✅ Moved log BELOW definition
+  console.log("🔥 Final SQL Query:");
+  console.log(query);
+  console.log("🧾 Values:");
+  console.log(values);
+  console.log("🧮 Value count:", values.length);
+  console.log("🧮 Placeholder count:", placeholders.length * 7); // assuming 7 fields per row
 
   try {
     const result = await pool.query(query, values);
-    res.status(201).json({ inserted: result.rowCount, rows: result.rows });
+    res.status(201).json({
+      inserted: result.rowCount,
+      skipped: transactions.length - result.rowCount,
+      rows: result.rows,
+    });
   } catch (err) {
     console.error("❌ Bulk insert failed:", err.message);
+    console.error("❌ Bulk insert failed FULL ERROR:", err);
     console.error(err.stack);
     res.status(500).json({ error: "Bulk insert failed" });
   }

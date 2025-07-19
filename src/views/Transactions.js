@@ -3,6 +3,14 @@ import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import Papa from "papaparse";
 import TransactionReviewModal from "../components/TransactionReviewModal";
 import axios from "axios"; // up top
+import SHA256 from "crypto-js/sha256";
+
+const createTransactionHash = (txn, userId) => {
+  const raw = `${userId}-${txn.date}-${txn.amount}-${txn.description
+    .trim()
+    .toLowerCase()}`;
+  return SHA256(raw).toString();
+};
 
 const Transactions = ({ currentUser }) => {
   const userId = currentUser?.id; // 💡 Clean and safe
@@ -32,16 +40,18 @@ const Transactions = ({ currentUser }) => {
     fetchCategories();
   }, []);
 
-  const handleUpload = (e) => {
+  const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
+
+      complete: async (results) => {
         const { data, meta } = results;
 
+        // Identify column names in the CSV (flexible to slight name changes)
         const dateKey = meta.fields.find((f) =>
           f.toLowerCase().includes("date")
         );
@@ -55,12 +65,14 @@ const Transactions = ({ currentUser }) => {
           f.toLowerCase().includes("card")
         );
 
+        // Validate required columns exist
         if (!dateKey || !descKey || !amountKey) {
           alert("CSV must include Date, Description, and Amount columns.");
           return;
         }
 
-        const cleaned = data
+        // Step 1: Clean and normalize the parsed CSV data
+        const rawTransactions = data
           .filter((row) => row[dateKey] && row[descKey] && row[amountKey])
           .map((row, index) => ({
             id: index,
@@ -76,7 +88,37 @@ const Transactions = ({ currentUser }) => {
           return;
         }
 
-        setTransactions(cleaned);
+        // Step 2: Get existing hashes from backend
+        let existingHashes = [];
+        try {
+          const res = await axios.get(
+            `http://localhost:5000/transactions/hashes?userId=${currentUser.id}`
+          );
+          existingHashes = res.data;
+        } catch (err) {
+          console.error("Error fetching existing hashes:", err);
+          alert("Couldn't validate duplicates. Try again later.");
+          return;
+        }
+
+        const known = new Set(existingHashes);
+
+        // Step 3: Add unique_hash and filter out duplicates
+        const deduped = rawTransactions
+          .map((txn) => {
+            const hash = createTransactionHash(txn, currentUser.id);
+            return { ...txn, unique_hash: hash };
+          })
+          .filter((txn) => !known.has(txn.unique_hash));
+
+        const duplicatesCount = rawTransactions.length - deduped.length;
+
+        if (duplicatesCount > 0) {
+          alert(`${duplicatesCount} duplicate transaction(s) were skipped.`);
+        }
+
+        // Step 4: Show the modal with clean data
+        setTransactions(deduped);
         setOpen(true);
       },
     });
@@ -91,6 +133,7 @@ const Transactions = ({ currentUser }) => {
         category: txn.category || null, // allow nulls
         amount: Number(txn.amount) || 0,
         card: txn.card || null, // ✅ add this
+        unique_hash: txn.unique_hash || null,
       }));
 
       const res = await axios.post(
