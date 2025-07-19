@@ -324,17 +324,26 @@ app.post("/transactions", async (req, res) => {
   const placeholders = [];
 
   transactions.forEach((tx, i) => {
-    const baseIndex = i * 5;
+    const baseIndex = i * 6; // 6 fields per row
+
     placeholders.push(
       `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${
         baseIndex + 4
-      }, $${baseIndex + 5})`
+      }, $${baseIndex + 5}, $${baseIndex + 6})`
     );
-    values.push(tx.user_id, tx.date, tx.description, tx.category, tx.amount);
+
+    values.push(
+      tx.user_id,
+      tx.date,
+      tx.description,
+      tx.category || null,
+      tx.amount,
+      tx.card || null
+    );
   });
 
   const query = `
-    INSERT INTO transactions (user_id, date, description, category, amount)
+    INSERT INTO transactions (user_id, date, description, category, amount, card)
     VALUES ${placeholders.join(", ")}
     RETURNING *;
   `;
@@ -343,7 +352,8 @@ app.post("/transactions", async (req, res) => {
     const result = await pool.query(query, values);
     res.status(201).json({ inserted: result.rowCount, rows: result.rows });
   } catch (err) {
-    console.error("Bulk insert failed:", err);
+    console.error("❌ Bulk insert failed:", err.message);
+    console.error(err.stack);
     res.status(500).json({ error: "Bulk insert failed" });
   }
 });

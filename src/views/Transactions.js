@@ -85,11 +85,12 @@ const Transactions = ({ currentUser }) => {
   const handleSave = async () => {
     try {
       const payload = transactions.map((txn) => ({
-        user_id: 3, // 👈 Replace with dynamic user ID if needed
-        date: txn.date,
-        description: txn.description,
-        category: txn.category,
-        amount: txn.amount,
+        user_id: userId,
+        date: new Date(txn.date).toISOString().split("T")[0], // 🧽 clean ISO date
+        description: txn.description || "",
+        category: txn.category || null, // allow nulls
+        amount: Number(txn.amount) || 0,
+        card: txn.card || null, // ✅ add this
       }));
 
       const res = await axios.post(
