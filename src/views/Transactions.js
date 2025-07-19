@@ -1,32 +1,8 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Modal,
-  Typography,
-  MenuItem,
-  Select,
-} from "@mui/material";
+import { Box, Button, Modal, Typography, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Papa from "papaparse";
-import { Autocomplete, TextField } from "@mui/material";
-
-const categoryOptions = [
-  "Groceries",
-  "Restaurants",
-  "Fitness",
-  "Travel",
-  "Subscriptions",
-  "Self-Care",
-  "Alcohol",
-  "Entertainment",
-  "Clothing",
-  "Business",
-  "Vacation",
-  "Misc",
-  "Electronics",
-  "Living",
-];
+import Autocomplete from "@mui/material/Autocomplete";
 
 const modalStyle = {
   position: "absolute",
@@ -37,28 +13,44 @@ const modalStyle = {
   boxShadow: 24,
   p: 4,
   borderRadius: 2,
-  width: "90%", // Responsive width
-  maxWidth: "900px", // 👈 This caps the width
-  maxHeight: "90vh", // Optional: keeps it from being too tall
-  overflow: "auto", // Scroll inside modal if needed
+  width: "90%",
+  maxWidth: "900px",
+  maxHeight: "90vh",
+  overflow: "auto",
 };
 
-const Transactions = () => {
+const Transactions = ({ currentUser }) => {
   const [transactions, setTransactions] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [open, setOpen] = useState(false);
 
-  const handleUpload = (e) => {
+  const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Load categories *just-in-time*
+    try {
+      const res = await fetch(
+        `http://localhost:5000/expense-categories?userId=${
+          currentUser?.id || ""
+        }`
+      );
+      const data = await res.json();
+      setCategoryOptions(data.map((c) => c.name));
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+      alert("Failed to load expense categories.");
+      return;
+    }
+
+    // Parse file
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
         const { data, meta } = results;
-        console.log("🔍 Parsed Headers:", meta.fields); // 💡 Check if they're correct
+        console.log("🔍 Parsed Headers:", meta.fields);
 
-        // Try to intelligently guess column mappings
         const dateKey = meta.fields.find((f) =>
           f.toLowerCase().includes("date")
         );
@@ -95,13 +87,6 @@ const Transactions = () => {
     });
   };
 
-  const handleCellEdit = (params) => {
-    const { id, field, value } = params;
-    setTransactions((prev) =>
-      prev.map((txn) => (txn.id === id ? { ...txn, [field]: value } : txn))
-    );
-  };
-
   const columns = [
     { field: "date", headerName: "Date", width: 120 },
     { field: "description", headerName: "Description", flex: 1 },
@@ -121,8 +106,15 @@ const Transactions = () => {
               prev.map((row) => (row.id === params.row.id ? updated : row))
             );
           }}
-          renderInput={(params) => <TextField {...params} variant="standard" />}
-          freeSolo // Optional: allow typing custom values
+          disablePortal
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select category"
+            />
+          )}
+          freeSolo
         />
       ),
     },
@@ -143,6 +135,7 @@ const Transactions = () => {
           <Typography variant="h6" gutterBottom>
             Review Transactions
           </Typography>
+
           <DataGrid
             rows={transactions}
             columns={columns}
@@ -151,6 +144,7 @@ const Transactions = () => {
             disableSelectionOnClick
             autoHeight
           />
+
           <Button
             onClick={() => setOpen(false)}
             sx={{ mt: 2 }}

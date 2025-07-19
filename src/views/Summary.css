@@ -1,23 +1,106 @@
-/* src/views/Summary.css */
+.budget-summary-table {
+  overflow-x: auto;
+  margin-top: 1rem;
+  max-width: 100%;
+  border: 1px solid #ddd;
+}
+
+/* 🔧 Table Layout */
 .budget-summary-table table {
   border-collapse: collapse;
+  min-width: 1200px; /* 👈 Ensures horizontal scroll, avoids overflow */
   width: 100%;
-  text-align: right;
-  font-family: "Segoe UI", sans-serif;
+  table-layout: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.9rem;
 }
 
-.budget-summary-table th,
-.budget-summary-table td {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-}
-
+/* ✅ Headers */
 .budget-summary-table th {
   background-color: #f5f5f5;
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
-.budget-summary-table td:first-child,
-.budget-summary-table th:first-child {
+/* ✅ Data Cells */
+.budget-summary-table td {
+  padding: 1px 6px;
+  border: 1px solid #ddd;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 🧩 Category Column */
+.label-cell {
   text-align: left;
   background-color: #f0f8ff;
+  font-weight: bold;
+  width: 100px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 🧮 Monthly Value Columns */
+.month-cell {
+  background-color: #eaf3fc;
+  width: 50px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 📊 Total Column */
+.total-cell {
+  background-color: #d0eafc;
+  font-weight: bold;
+  width: 75px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 💰 Budget Column */
+.budget-cell {
+  background-color: #fddcdc;
+  font-weight: bold;
+  width: 75px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 🧾 Totals Row */
+.total-row td {
+  font-weight: bold;
+  background-color: #f3f3f3;
+  border-top: 2px solid #000;
+}
+
+/* 🖱️ Hover */
+.budget-summary-table tr:hover td {
+  background-color: #f9f9f9;
+}
+
+/* 📱 Responsive fix */
+@media (max-width: 768px) {
+  .label-cell {
+    width: 140px;
+  }
+  .month-cell,
+  .total-cell,
+  .budget-cell {
+    font-size: 0.8rem;
+    padding: 4px;
+  }
+}
+
+.currency-cell {
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace; /* Optional: gives that Excel-like look */
+  padding: 0 6px;
 }

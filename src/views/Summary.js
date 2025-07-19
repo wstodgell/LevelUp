@@ -20,6 +20,13 @@ const monthOrder = [
   "December",
 ];
 
+// 📍 At the top of Summary.js
+const formatCurrency = (num) =>
+  Number(num).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+
 function Summary({ currentUser }) {
   const [budgetData, setBudgetData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,11 +78,14 @@ function Summary({ currentUser }) {
         <table>
           <thead>
             <tr>
-              <th>Category</th>
+              <th className="label-cell">Category</th>
               {monthOrder.map((m) => (
-                <th key={m}>{m.slice(0, 3)}</th>
+                <th key={m} className="month-cell">
+                  {m.slice(0, 3)}
+                </th>
               ))}
-              <th>Total</th>
+              <th className="total-cell">Total</th>
+              <th className="budget-cell">Budget</th>
             </tr>
           </thead>
           <tbody>
@@ -83,18 +93,66 @@ function Summary({ currentUser }) {
               let total = 0;
               return (
                 <tr key={cat}>
-                  <td>{cat}</td>
+                  <td className="label-cell">{cat}</td>
                   {monthOrder.map((month) => {
-                    const value = Number(grouped[cat][month] || 0); // 🔒 Coerce value to number
-                    total += value; // ✅ total is now always numeric
-                    return <td key={month}>${value.toFixed(2)}</td>;
+                    const value = Number(grouped[cat][month] || 0);
+                    total += value;
+                    return (
+                      <td key={month} className="month-cell">
+                        {formatCurrency(value)}
+                      </td>
+                    );
                   })}
-                  <td>
-                    <strong>${total.toFixed(2)}</strong>
+                  <td className="total-cell">{formatCurrency(total)}</td>
+                  <td className="budget-cell">
+                    {formatCurrency(Number(total / 12))}
                   </td>
                 </tr>
               );
             })}
+            <tr className="total-row">
+              <td className="label-cell">
+                <strong>Total Fixed Exp</strong>
+              </td>
+              {monthOrder.map((month) => {
+                const totalForMonth = categories.reduce((sum, cat) => {
+                  return sum + Number(grouped[cat][month] || 0);
+                }, 0);
+                return (
+                  <td key={month} className="month-cell">
+                    <strong>{formatCurrency(totalForMonth)}</strong>
+                  </td>
+                );
+              })}
+              <td className="total-cell">
+                <strong>
+                  {formatCurrency(
+                    categories.reduce((sum, cat) => {
+                      return (
+                        sum +
+                        monthOrder.reduce((catTotal, month) => {
+                          return catTotal + Number(grouped[cat][month] || 0);
+                        }, 0)
+                      );
+                    }, 0)
+                  )}
+                </strong>
+              </td>
+              <td className="budget-cell">
+                <strong>
+                  {formatCurrency(
+                    categories.reduce((sum, cat) => {
+                      return (
+                        sum +
+                        monthOrder.reduce((catTotal, month) => {
+                          return catTotal + Number(grouped[cat][month] || 0);
+                        }, 0)
+                      );
+                    }, 0) / 12
+                  )}
+                </strong>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

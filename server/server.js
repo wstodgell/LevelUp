@@ -168,6 +168,27 @@ app.post("/submit", async (req, res) => {
   }
 });
 
+app.get("/expense-categories", async (req, res) => {
+  const userId = req.query.userId || null;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT id, name 
+      FROM expense_categories 
+      WHERE user_id IS NULL OR user_id = $1
+      ORDER BY name
+      `,
+      [userId]
+    );
+
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Failed to fetch expense categories:", err);
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
 // New: Signup endpoint
 app.post("/signup", async (req, res) => {
   try {
