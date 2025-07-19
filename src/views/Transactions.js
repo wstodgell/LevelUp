@@ -1,55 +1,44 @@
-import React, { useState } from "react";
-import { Box, Button, Modal, Typography, TextField } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import React, { useState, useEffect } from "react";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import Papa from "papaparse";
-import Autocomplete from "@mui/material/Autocomplete";
+import TransactionReviewModal from "../components/TransactionReviewModal";
 
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 2,
-  width: "90%",
-  maxWidth: "900px",
-  maxHeight: "90vh",
-  overflow: "auto",
-};
-
-const Transactions = ({ currentUser }) => {
+const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
-  const [categoryOptions, setCategoryOptions] = useState([]);
   const [open, setOpen] = useState(false);
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
-  const handleUpload = async (e) => {
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/expense-categories?userId=3"
+        );
+        const data = await res.json();
+        const names = data.map((cat) => cat.name);
+        setExpenseCategories(names);
+      } catch (err) {
+        console.error("Error fetching expense categories:", err);
+        alert("Failed to load expense categories.");
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Load categories *just-in-time*
-    try {
-      const res = await fetch(
-        `http://localhost:5000/expense-categories?userId=${
-          currentUser?.id || ""
-        }`
-      );
-      const data = await res.json();
-      setCategoryOptions(data.map((c) => c.name));
-    } catch (err) {
-      console.error("Failed to load categories:", err);
-      alert("Failed to load expense categories.");
-      return;
-    }
-
-    // Parse file
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
         const { data, meta } = results;
-        console.log("🔍 Parsed Headers:", meta.fields);
 
         const dateKey = meta.fields.find((f) =>
           f.toLowerCase().includes("date")
@@ -65,7 +54,7 @@ const Transactions = ({ currentUser }) => {
         );
 
         if (!dateKey || !descKey || !amountKey) {
-          alert("⛔ CSV must include Date, Description, and Amount columns.");
+          alert("CSV must include Date, Description, and Amount columns.");
           return;
         }
 
@@ -80,80 +69,48 @@ const Transactions = ({ currentUser }) => {
             category: "",
           }));
 
-        console.log("✅ Cleaned transactions:", cleaned);
+        if (!expenseCategories.length) {
+          alert("Expense categories not loaded yet.");
+          return;
+        }
+
         setTransactions(cleaned);
         setOpen(true);
       },
     });
   };
 
-  const columns = [
-    { field: "date", headerName: "Date", width: 120 },
-    { field: "description", headerName: "Description", flex: 1 },
-    { field: "amount", headerName: "Amount", width: 100, type: "number" },
-    { field: "card", headerName: "Card", width: 120 },
-    {
-      field: "category",
-      headerName: "Category",
-      width: 160,
-      renderCell: (params) => (
-        <Autocomplete
-          options={categoryOptions}
-          value={params.row.category || ""}
-          onChange={(e, newValue) => {
-            const updated = { ...params.row, category: newValue };
-            setTransactions((prev) =>
-              prev.map((row) => (row.id === params.row.id ? updated : row))
-            );
-          }}
-          disablePortal
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              placeholder="Select category"
-            />
-          )}
-          freeSolo
-        />
-      ),
-    },
-  ];
+  const handleSave = () => {
+    console.log("✅ Saving transactions:", transactions);
+    // TODO: Replace with API call to save to DB
+    setOpen(false);
+  };
 
   return (
     <Box sx={{ padding: "2rem" }}>
       <Typography variant="h5" gutterBottom>
         Upload Transactions CSV
       </Typography>
-      <Button variant="contained" component="label">
-        Upload CSV
-        <input type="file" accept=".csv" hidden onChange={handleUpload} />
-      </Button>
 
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box sx={modalStyle}>
-          <Typography variant="h6" gutterBottom>
-            Review Transactions
-          </Typography>
-
-          <DataGrid
-            rows={transactions}
-            columns={columns}
-            pageSize={100}
-            rowsPerPageOptions={[100]}
-            disableSelectionOnClick
-            autoHeight
-          />
-
-          <Button
-            onClick={() => setOpen(false)}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          >
-            Close
-          </Button>
+      {loadingCategories ? (
+        <Box display="flex" alignItems="center" gap={1}>
+          ⏳ <Typography>Loading categories...</Typography>
         </Box>
-      </Modal>
+      ) : (
+        <Button variant="contained" component="label">
+          Upload CSV
+          <input type="file" accept=".csv" hidden onChange={handleUpload} />
+        </Button>
+      )}
+
+      <TransactionReviewModal
+        open={open}
+        transactions={transactions}
+        setTransactions={setTransactions}
+        expenseCategories={expenseCategories}
+        handleClose={() => setOpen(false)}
+        handleSave={handleSave}
+      />
     </Box>
   );
 };
