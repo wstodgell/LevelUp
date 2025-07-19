@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import Papa from "papaparse";
 import TransactionReviewModal from "../components/TransactionReviewModal";
+import axios from "axios"; // up top
 
-const Transactions = () => {
+const Transactions = ({ currentUser }) => {
+  const userId = currentUser?.id; // 💡 Clean and safe
   const [transactions, setTransactions] = useState([]);
   const [open, setOpen] = useState(false);
   const [expenseCategories, setExpenseCategories] = useState([]);
@@ -14,7 +16,7 @@ const Transactions = () => {
     const fetchCategories = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/expense-categories?userId=3"
+          `http://localhost:5000/expense-categories?userId=${userId}`
         );
         const data = await res.json();
         const names = data.map((cat) => cat.name);
@@ -80,10 +82,28 @@ const Transactions = () => {
     });
   };
 
-  const handleSave = () => {
-    console.log("✅ Saving transactions:", transactions);
-    // TODO: Replace with API call to save to DB
-    setOpen(false);
+  const handleSave = async () => {
+    try {
+      const payload = transactions.map((txn) => ({
+        user_id: 3, // 👈 Replace with dynamic user ID if needed
+        date: txn.date,
+        description: txn.description,
+        category: txn.category,
+        amount: txn.amount,
+      }));
+
+      const res = await axios.post(
+        "http://localhost:5000/transactions",
+        payload
+      );
+
+      console.log("✅ Saved to DB:", res.data);
+      alert(`Saved ${res.data.inserted} transactions!`);
+      setOpen(false);
+    } catch (err) {
+      console.error("❌ Failed to save transactions:", err);
+      alert("Failed to save transactions.");
+    }
   };
 
   return (
