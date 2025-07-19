@@ -9,6 +9,8 @@ import EndOfDay from "./views/EndOfDay";
 import Login from "./views/Login";
 import SignUp from "./views/SignUp";
 import BudgetTable from "./views/BudgetTable";
+import Transactions from "./views/Transactions";
+import Summary from "./views/Summary";
 
 // Components for different views
 function Home() {
@@ -23,8 +25,12 @@ function MonthGoals() {
   return <div>This is the Month Goals component</div>;
 }
 
-function Summary() {
-  return <div>This is the Summary component</div>;
+function SummaryView({ currentUser }) {
+  return (
+    <div style={{ padding: "2rem" }}>
+      <Summary currentUser={currentUser} />
+    </div>
+  );
 }
 
 function Budget({ currentUser }) {
@@ -35,8 +41,12 @@ function Budget({ currentUser }) {
   );
 }
 
-function Transactions() {
-  return <div>This is the Transactions component</div>;
+function TransactionsView({ currentUser }) {
+  return (
+    <div style={{ padding: "2rem" }}>
+      <Transactions currentUser={currentUser} />
+    </div>
+  );
 }
 
 function Profile() {
@@ -105,9 +115,16 @@ function App() {
   const [activeComponent, setActiveComponent] = useState("Login");
   const [currentUser, setCurrentUser] = useState(null);
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+  }, []);
   const handleLoginSuccess = (userData) => {
     console.log("Logged-in user data:", userData); // 🔍 Check this in your browser console
     setCurrentUser(userData);
+    localStorage.setItem("currentUser", JSON.stringify(userData));
   };
 
   // Function to render the selected component
@@ -140,12 +157,12 @@ function App() {
       case "MonthGoals":
         return <MonthGoals />;
       case "Summary":
-        return <Summary />;
+        return <SummaryView currentUser={currentUser} />;
       case "Budget":
         console.log("Logged-in user data:", currentUser);
         return <Budget currentUser={currentUser} />;
       case "Transactions":
-        return <Transactions />;
+        return <TransactionsView currentUser={currentUser} />;
       case "Profile":
         return <Profile />;
       case "Settings":
@@ -172,7 +189,10 @@ function App() {
             <div className="menu-welcome">Welcome, {currentUser.username}!</div>
             <button
               className="menu-button"
-              onClick={() => setCurrentUser(null)}
+              onClick={() => {
+                setCurrentUser(null);
+                localStorage.removeItem("currentUser");
+              }}
             >
               Log Out
             </button>
